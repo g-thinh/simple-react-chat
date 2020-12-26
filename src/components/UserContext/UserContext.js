@@ -42,7 +42,7 @@ const UserProvider = ({ children }) => {
     await userRef.set(info);
     setUser(info);
     localStorage.setItem("currentUser", userKey);
-    history.push(`/chats/${chatKey}`);
+    history.push(`/dashboard`);
   }
 
   async function fetchUser(id) {
