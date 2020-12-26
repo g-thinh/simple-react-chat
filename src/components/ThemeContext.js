@@ -1,8 +1,7 @@
 import React from "react";
 import createMuiTheme from "@material-ui/core/styles/createMuiTheme";
-import ThemeProvider from "@material-ui/core/styles/MuiThemeProvider";
+import { ThemeProvider } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
-import useMediaQuery from "@material-ui/core/useMediaQuery";
 export const ThemeTypeContext = React.createContext(null);
 
 const CustomThemeProvider = ({ children }) => {
