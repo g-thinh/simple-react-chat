@@ -12,6 +12,23 @@ const CustomThemeProvider = ({ children }) => {
     palette: {
       type: darkMode ? "dark" : "light",
     },
+    overrides: {
+      MuiCssBaseline: {
+        "@global": {
+          "*::-webkit-scrollbar": {
+            width: "1rem",
+          },
+          "*::-webkit-scrollbar-track": {
+            "-webkit-box-shadow": "inset 0 0 6px rgba(0,0,0,0.00)",
+            borderRadius: 10,
+          },
+          "*::-webkit-scrollbar-thumb": {
+            backgroundColor: "rgba(0,0,0,.1)",
+            borderRadius: 10,
+          },
+        },
+      },
+    },
   });
 
   function handleDarkModeToggle() {
