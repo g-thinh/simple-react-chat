@@ -7,6 +7,7 @@ import Typography from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
 import Container from "@material-ui/core/Container";
 import { Link } from "react-router-dom";
+import { UserContext } from "../UserContext";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -24,6 +25,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function Nav() {
   const classes = useStyles();
+  const { user, logout } = React.useContext(UserContext);
 
   return (
     <Container className={classes.root} maxWidth="lg">
@@ -40,9 +42,15 @@ export default function Nav() {
           <Button color="inherit" component={Link} to="/about">
             About
           </Button>
-          <Button color="inherit" component={Link} to="/login">
-            Login
-          </Button>
+          {!user.isLoggedIn ? (
+            <Button color="inherit" component={Link} to="/login">
+              Login
+            </Button>
+          ) : (
+            <Button color="inherit" onClick={logout}>
+              Logout
+            </Button>
+          )}
         </Toolbar>
       </AppBar>
     </Container>
