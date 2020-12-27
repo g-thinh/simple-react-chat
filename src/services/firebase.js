@@ -32,7 +32,11 @@ export const signup = async (email, password, name) => {
   return auth()
     .createUserWithEmailAndPassword(email, password)
     .then(async (res) => {
-      await db.ref("chats/main").child("members").update({ id: res.user.uid });
+      await db.ref("chats/main").child("members").push({ id: res.user.uid });
+      res.user.updateProfile({
+        displayName: name,
+        photoURL: `https://ui-avatars.com/api/?background=random&name=${name}&format=png`,
+      });
       await db
         .ref("users")
         .child(res.user.uid)
