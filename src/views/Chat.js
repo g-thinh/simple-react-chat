@@ -1,4 +1,5 @@
 import React from "react";
+import styled from "styled-components";
 import { useParams } from "react-router-dom";
 import { UserContext } from "../components/UserContext";
 import { db } from "../services/firebase";
@@ -8,6 +9,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 import Box from "@material-ui/core/Box";
+import Typography from "@material-ui/core/Typography";
 
 const useStyles = makeStyles((theme) => ({
   main: {
@@ -15,6 +17,10 @@ const useStyles = makeStyles((theme) => ({
     overflowY: "scroll",
     overflow: "hidden",
     height: "50vh",
+  },
+  title: {
+    textAlign: "center",
+    margin: "1rem",
   },
 }));
 
@@ -33,7 +39,7 @@ const Chat = () => {
     try {
       await db
         .ref("messages")
-        .child(chatID)
+        .child(id)
         .on("value", (snapshot) => {
           if (snapshot.exists()) {
             let msgs = [];
@@ -59,7 +65,7 @@ const Chat = () => {
       await db.ref("messages").child(id).push({
         content: content,
         date: Date.now(),
-        sentBy: user.id,
+        sentBy: user.uid,
       });
       setContent("");
     } catch (error) {
@@ -78,18 +84,27 @@ const Chat = () => {
 
   React.useEffect(() => {
     ScrollToBottom();
-    validateChat(id);
+    // validateChat(id);
     fetchChat(id);
   }, []);
 
   return (
     <Container>
-      <h1>This is the Chat Page for {id}</h1>
-      <p>Currently Logged In User: {user.name}</p>
+      <Typography variant="h3" className={classes.title}>
+        Main Chat
+      </Typography>
       <Paper>
         <Container className={classes.main} ref={messageEl}>
-          {messages.map((msg) => {
-            return <p key={msg.timestamp}>{msg.content}</p>;
+          {messages.map((msg, index) => {
+            return msg.sentBy === user.uid ? (
+              <Message isUser key={index}>
+                <p>{msg.content}</p>
+              </Message>
+            ) : (
+              <Message key={index}>
+                <p>{msg.content}</p>
+              </Message>
+            );
           })}
         </Container>
         <form onSubmit={handleSubmit} style={{ width: "100%" }}>
@@ -99,6 +114,7 @@ const Chat = () => {
                 onChange={handleChange}
                 value={content}
                 variant="outlined"
+                placeholder="Type your message..."
                 fullWidth
               />
             </Box>
@@ -118,5 +134,24 @@ const Chat = () => {
     </Container>
   );
 };
+
+const Message = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: ${(props) => (props.isUser ? "flex-end" : "flex-start")};
+  /* margin: ${(props) => (props.isUser ? "0 5rem 0 0" : "0 0 0 5rem")}; */
+  padding: ${(props) => (props.isUser ? "0 0 0 25%" : "0 25% 0 0")};
+  /* border: 1px solid red; */
+  width: auto;
+
+  & p {
+    padding: 0.5rem;
+    margin: 0.3rem;
+    border-radius: 12px;
+    background: ${(props) => (props.isUser ? "dodgerblue" : "#6c757d")};
+    color: white;
+    word-break: break-all;
+  }
+`;
 
 export default Chat;
