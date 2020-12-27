@@ -55,7 +55,7 @@ const Login = () => {
   return (
     <Container>
       {/* <Typography variant="h3">This is the Login Page</Typography> */}
-      <Paper className={classes.paper} style={{ width: "35rem" }}>
+      <Paper className={classes.paper}>
         <form onSubmit={handleSubmit}>
           <Grid
             container
