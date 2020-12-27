@@ -1,5 +1,5 @@
 import React from "react";
-import { db } from "../../services/firebase";
+import { db, auth } from "../../services/firebase";
 import { useHistory } from "react-router-dom";
 
 export const UserContext = React.createContext({
@@ -9,7 +9,13 @@ export const UserContext = React.createContext({
 
 const UserProvider = ({ children }) => {
   const history = useHistory();
-  const [user, setUser] = React.useState({ name: null, isLoggedIn: false });
+  const [loading, setLoading] = React.useState();
+  const [user, setUser] = React.useState({
+    name: null,
+    isLoggedIn: false,
+    email: null,
+    uid: null,
+  });
 
   async function validateChat(chatID) {
     const chatRef = db.ref("chats").child(chatID).child("members");
@@ -25,20 +31,17 @@ const UserProvider = ({ children }) => {
 
   async function addUser(name) {
     const userKey = db.ref("users").push().getKey();
-    const chatKey = db.ref("chats").push().getKey();
-
+    const chatRef = db.ref("chats").child("main");
     const userRef = db.ref("users").child(userKey);
-    const chatRef = db.ref("chats").child(chatKey);
-
     const info = {
       name: name,
       createdDate: Date.now(),
       isLoggedIn: true,
-      currentChat: chatKey,
+      currentChat: "main",
       id: userKey,
     };
 
-    await chatRef.set({ members: { 0: userKey }, createTime: Date.now() });
+    await chatRef.child("members").push(userKey);
     await userRef.set(info);
     setUser(info);
     localStorage.setItem("currentUser", userKey);
@@ -54,26 +57,39 @@ const UserProvider = ({ children }) => {
           setUser(snapshot.val());
         }
       });
-  }
 
-  async function logout() {
-    await db.ref("users").child(user.id).update({ isLoggedIn: false });
-    localStorage.removeItem("currentUser");
-    setUser({ name: null, isLoggedIn: false });
+    await db
+      .ref("users")
+      .child(id)
+      .once("value", (snapshot) => {
+        if (snapshot.exists()) {
+          setUser(snapshot.val());
+        }
+      });
   }
 
   React.useState(() => {
-    console.log("[UserContext.js] Current User", user);
-
-    const checkCurrentUser = localStorage.getItem("currentUser");
-    if (checkCurrentUser) {
-      console.log("Current user is:", checkCurrentUser);
-      fetchUser(checkCurrentUser);
-    }
+    const unlisten = auth().onAuthStateChanged((profile) => {
+      if (profile) {
+        setUser({
+          isLoggedIn: true,
+          email: profile.email,
+          name: profile.displayName,
+          uid: profile.uid,
+        });
+        setLoading(false);
+      } else {
+        setUser({ name: null, isLoggedIn: false, email: null, uid: null });
+        setLoading(false);
+      }
+    });
+    return () => {
+      unlisten();
+    };
   }, [user.isLoggedIn]);
 
   return (
-    <UserContext.Provider value={{ addUser, user, validateChat, logout }}>
+    <UserContext.Provider value={{ user, validateChat }}>
       {children}
     </UserContext.Provider>
   );

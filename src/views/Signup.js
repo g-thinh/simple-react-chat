@@ -8,8 +8,7 @@ import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
 import { useHistory } from "react-router-dom";
 import { UserContext } from "../components/UserContext";
-
-import { signin } from "../services/firebase";
+import { signup } from "../services/firebase";
 
 const useStyles = makeStyles((theme) => ({
   main: {
@@ -27,26 +26,32 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Login = () => {
+const Signup = () => {
   const classes = useStyles();
+  const { addUser } = React.useContext(UserContext);
 
+  const [name, setName] = React.useState("");
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
-  const [error, setError] = React.useState(false);
+  const [error, setError] = React.useState(null);
 
-  const handleEmailChange = (event) => {
+  function handleNameChange(event) {
+    setName(event.target.value);
+  }
+
+  function handleEmailChange(event) {
     setEmail(event.target.value);
-  };
+  }
 
-  const handlePasswordChange = (event) => {
+  function handlePasswordChange(event) {
     setPassword(event.target.value);
-  };
+  }
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
     try {
-      await signin(email, password);
+      await signup(email, password, name);
     } catch (error) {
       setError(error.message);
     }
@@ -54,8 +59,8 @@ const Login = () => {
 
   return (
     <Container>
-      {/* <Typography variant="h3">This is the Login Page</Typography> */}
-      <Paper className={classes.paper} style={{ width: "35rem" }}>
+      <Typography variant="h3">Sign Up</Typography>
+      <Paper className={classes.paper}>
         <form onSubmit={handleSubmit}>
           <Grid
             container
@@ -66,14 +71,25 @@ const Login = () => {
             spacing={2}
           >
             <Grid item>
-              <Typography variant="h5">Please Sign In</Typography>
+              <Typography variant="h5">Please Sign Up</Typography>
+            </Grid>
+            <Grid item>
+              <TextField
+                className={classes.input}
+                id="standard-textarea"
+                label="Name"
+                placeholder="Please enter your name here."
+                value={name}
+                onChange={handleNameChange}
+                required
+              />
             </Grid>
             <Grid item>
               <TextField
                 className={classes.input}
                 id="standard-textarea"
                 label="Email"
-                placeholder="Please enter your email"
+                placeholder="Please enter your email here."
                 value={email}
                 onChange={handleEmailChange}
                 required
@@ -85,13 +101,12 @@ const Login = () => {
                 id="standard-textarea"
                 label="Password"
                 type="password"
-                placeholder="Please enter your password"
+                placeholder="Please enter your desired password."
                 value={password}
                 onChange={handlePasswordChange}
                 required
               />
             </Grid>
-            <p>{error}</p>
             <Grid item>
               <Button variant="contained" color="primary" type="submit">
                 Submit
@@ -104,4 +119,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Signup;
