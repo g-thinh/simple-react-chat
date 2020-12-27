@@ -13,6 +13,7 @@ import { signout } from "../../services/firebase";
 
 // Side bar
 import Drawer from "@material-ui/core/Drawer";
+import SwipeableDrawer from "@material-ui/core/SwipeableDrawer";
 import IconButton from "@material-ui/core/IconButton";
 import MenuIcon from "@material-ui/icons/Menu";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
@@ -31,8 +32,8 @@ import ExitToAppIcon from "@material-ui/icons/ExitToApp";
 const drawerWidth = 240;
 const useStyles = makeStyles((theme) => ({
   root: {
-    display: "flex",
     flexGrow: 1,
+    padding: 0,
   },
   menuButton: {
     marginRight: theme.spacing(2),
@@ -45,133 +46,49 @@ const useStyles = makeStyles((theme) => ({
   menuButton: {
     marginRight: theme.spacing(2),
   },
-  hide: {
-    display: "none",
+  list: {
+    width: 250,
   },
-  appBar: {
-    transition: theme.transitions.create(["margin", "width"], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-  },
-  appBarShift: {
-    width: `calc(100% - ${drawerWidth}px)`,
-    marginLeft: drawerWidth,
-    transition: theme.transitions.create(["margin", "width"], {
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-  },
-  drawer: {
-    width: drawerWidth,
-    flexShrink: 0,
-  },
-  drawerPaper: {
-    width: drawerWidth,
-  },
-  drawerHeader: {
-    display: "flex",
-    alignItems: "center",
-    padding: theme.spacing(0, 1),
-    // necessary for content to be below app bar
-    ...theme.mixins.toolbar,
-    justifyContent: "flex-end",
-  },
-  content: {
-    flexGrow: 1,
-    padding: theme.spacing(3),
-    transition: theme.transitions.create("margin", {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-    marginLeft: -drawerWidth,
-    marginTop: "5rem",
-  },
-  contentShift: {
-    transition: theme.transitions.create("margin", {
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-    marginLeft: 0,
+  fullList: {
+    width: "auto",
   },
 }));
 
 export default function Nav({ children }) {
   const classes = useStyles();
-  const theme = useTheme();
   const { user } = React.useContext(UserContext);
   const [open, setOpen] = React.useState(false);
 
-  const toggleDrawer = () => {
-    setOpen(!open);
+  const toggleDrawer = (toggle) => (event) => {
+    if (
+      event &&
+      event.type === "keydown" &&
+      (event.key === "Tab" || event.key === "Shift")
+    ) {
+      return;
+    }
+    setOpen(toggle);
   };
 
-  return (
-    <Container className={classes.root} maxWidth="lg">
-      <AppBar
-        position="fixed"
-        className={clsx(classes.appBar, {
-          [classes.appBarShift]: open,
-        })}
-      >
-        <Toolbar>
-          {user.isLoggedIn && (
-            <IconButton
-              color="inherit"
-              aria-label="open drawer"
-              onClick={toggleDrawer}
-              edge="start"
-              className={clsx(classes.menuButton, open && classes.hide)}
-            >
-              <MenuIcon />
-            </IconButton>
-          )}
+  // const toggleDrawer = () => {
+  //   setOpen(!open);
+  // };
 
-          <Typography
-            variant="h6"
-            className={classes.title}
-            component={Link}
-            to={user.isLoggedIn ? "/dashboard" : "/"}
-          >
-            Simple Chat
-          </Typography>
-          <Button color="inherit" component={Link} to="/about">
-            About
-          </Button>
-          {!user.isLoggedIn ? (
-            <>
-              <Button color="inherit" component={Link} to="/login">
-                Login
-              </Button>
-              <Button color="inherit" component={Link} to="/signup">
-                Sign Up
-              </Button>
-            </>
-          ) : (
-            <Button color="inherit" onClick={signout}>
-              Logout
-            </Button>
-          )}
-        </Toolbar>
-      </AppBar>
-      <Drawer
-        className={classes.drawer}
-        variant="persistent"
-        anchor="left"
-        open={open}
-        classes={{
-          paper: classes.drawerPaper,
-        }}
+  React.useEffect(() => {}, [user.isLoggedIn]);
+
+  const menu = () => {
+    return (
+      <div
+        className={classes.list}
+        role="presentation"
+        onClick={toggleDrawer(false)}
+        onKeyDown={toggleDrawer(false)}
       >
-        <div className={classes.drawerHeader}>
-          <IconButton onClick={toggleDrawer}>
-            {theme.direction === "ltr" ? (
-              <ChevronLeftIcon />
-            ) : (
-              <ChevronRightIcon />
-            )}
-          </IconButton>
-        </div>
+        <List>
+          <ListItem>
+            <ListItemText primary={`Welcome, ${user.name}`} />
+          </ListItem>
+        </List>
         <Divider />
         <List>
           <ListItem button component={Link} to="/account">
@@ -193,7 +110,7 @@ export default function Nav({ children }) {
             button
             onClick={() => {
               signout();
-              toggleDrawer();
+              toggleDrawer(false);
             }}
           >
             <ListItemIcon>
@@ -202,14 +119,63 @@ export default function Nav({ children }) {
             <ListItemText primary={"Logout"} />
           </ListItem>
         </List>
-      </Drawer>
-      <main
-        className={clsx(classes.content, {
-          [classes.contentShift]: open,
-        })}
+      </div>
+    );
+  };
+
+  return (
+    <Container className={classes.root} maxWidth="lg">
+      <AppBar position="static">
+        <Toolbar>
+          {user.isLoggedIn && (
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              onClick={toggleDrawer(!open)}
+              edge="start"
+              className={clsx(classes.menuButton, open && classes.hide)}
+            >
+              <MenuIcon />
+            </IconButton>
+          )}
+
+          <Typography
+            variant="h6"
+            className={classes.title}
+            component={Link}
+            to={user.isLoggedIn ? "/dashboard" : "/"}
+          >
+            Simple Chat
+          </Typography>
+          <Button color="inherit" component={Link} to="/about">
+            About
+          </Button>
+          {!user.isLoggedIn && (
+            <>
+              <Button color="inherit" component={Link} to="/login">
+                Login
+              </Button>
+              <Button color="inherit" component={Link} to="/signup">
+                Sign Up
+              </Button>
+            </>
+          )}
+        </Toolbar>
+      </AppBar>
+      <SwipeableDrawer
+        className={classes.drawer}
+        variant="temporary"
+        anchor="left"
+        open={open}
+        onClose={toggleDrawer(false)}
+        onOpen={toggleDrawer(true)}
+        classes={{
+          paper: classes.drawerPaper,
+        }}
       >
-        {children}
-      </main>
+        {menu()}
+      </SwipeableDrawer>
+      <main>{children}</main>
     </Container>
   );
 }
