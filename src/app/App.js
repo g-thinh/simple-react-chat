@@ -9,6 +9,7 @@ import Login from "../views/Login";
 import Chat from "../views/Chat";
 import Dashboard from "../views/Dashboard";
 import Signup from "../views/Signup";
+import Account from "../views/Account";
 import Nav from "../components/Nav";
 
 import CustomThemeProvider from "../components/ThemeContext";
@@ -38,6 +39,12 @@ const App = () => {
               exact
               path="/dashboard"
               component={Dashboard}
+              reroute="/login"
+            />
+            <PrivateRoute
+              exact
+              path="/account"
+              component={Account}
               reroute="/login"
             />
             <PrivateRoute
